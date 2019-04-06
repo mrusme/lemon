@@ -32,7 +32,7 @@ font = ImageFont.truetype(font_file, font_size)
 def animate_icon(image):
     lock_ui.acquire()
 
-    for i in range(0, 2):
+    for i in range(0, 3):
         # this is the original pimoroni function for drawing sprites
         for o_x in range(int(image.size[0] / width)):
             for o_y in range(int(image.size[1] / height)):
