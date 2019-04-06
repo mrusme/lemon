@@ -73,9 +73,15 @@ class IftttResource(object):
         if req.context['request']:
             body = req.context['request']
             print(body)
-            # TODO: Find a way to integrate with IFTTT Webhooks (https://ifttt.com/maker_webhooks)
-            # but still allow people to customize what would appear on lemon.
-            resp.status = falcon.HTTP_204
+
+            if 'icon' in body and 'text' in body:
+                ledhat.icon(body['icon'])
+                ledhat.text(body['text'])
+                resp.status = falcon.HTTP_204
+            else:
+                resp.status = falcon.HTTP_400
+        else:
+            resp.status = falcon.HTTP_500
 
 app = falcon.API(middleware=[
     MiddlewareJson(),
