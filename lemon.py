@@ -2,6 +2,7 @@
 import falcon
 import json
 import ledhat
+import time
 
 class MiddlewareJson(object):
     # Borrowed this from https://eshlox.net/2017/08/02/falcon-framework-json-middleware-loads-dumps/
@@ -52,16 +53,19 @@ class GitHubResource(object):
 
                 text = 'New commit by ' + committer_username + ' in ' + repository_full_name + ': ' + commit_message
                 ledhat.icon('octocat')
+                time.sleep(.500)
                 ledhat.text(text)
             elif 'forkee' in body and body['forkee']['fork'] == True:
                 full_name = body['forkee']['full_name']
                 text = repository_full_name + ' was forked to ' + full_name
                 ledhat.icon('fork')
+                time.sleep(.500)
                 ledhat.text(text)
             elif 'context' in body and body['context'] == 'ci/dockercloud':
                 description = body['description']
                 text = repository_full_name + ': ' + description
                 ledhat.icon('docker')
+                time.sleep(.500)
                 ledhat.text(text)
 
             resp.status = falcon.HTTP_204
@@ -76,6 +80,7 @@ class IftttResource(object):
 
             if 'icon' in body and 'text' in body:
                 ledhat.icon(body['icon'])
+                time.sleep(.500)
                 ledhat.text(body['text'])
                 resp.status = falcon.HTTP_204
             else:
@@ -86,6 +91,11 @@ class IftttResource(object):
 app = falcon.API(middleware=[
     MiddlewareJson(),
 ])
+
+
+ledhat.icon('lemon')
+time.sleep(.500)
+ledhat.text('Lemon')
 
 github = GitHubResource()
 ifttt = IftttResource()
