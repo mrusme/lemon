@@ -79,7 +79,12 @@ class IftttResource(object):
             print(body)
 
             if 'icon' in body and 'text' in body:
-                ledhat.icon(body['icon'])
+                repeat = 3
+
+                if 'icon_repeat' in body:
+                    repeat = int(body['icon_repeat'])
+
+                ledhat.icon(body['icon'], repeat)
                 time.sleep(.500)
                 ledhat.text(body['text'])
                 resp.status = falcon.HTTP_204

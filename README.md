@@ -73,6 +73,8 @@ Build your IFTTT rule by specifying the `If this` service and using `Webhooks` a
 
 ![Webhook](docs/ifttt-make_a_web_request.png)
 
+#### API
+
 The body of the webhook should contain of the following JSON:
 
 ```json
@@ -83,6 +85,16 @@ The body of the webhook should contain of the following JSON:
 ```
 
 You need to make sure that the icon name you specify actually exists within the `icons/` folder and is a `.png` file. If you want to use the icon `icons/docker.png`, simply specify `"icon": "docker"` in the JSON.
+
+By default, each icon animation is being repeated three times. However, you can override that by specifying an additional JSON parameter named `icon_repeat`, e.g.:
+
+```json
+{ 
+  "icon": "doom-bloody",
+  "icon_repeat": 1,
+  "text": "Game over!"
+}
+```
 
 ## Testing
 

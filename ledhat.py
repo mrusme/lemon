@@ -29,10 +29,10 @@ font_file = 'fonts/Hack-Regular.ttf'
 font_size = 12
 font = ImageFont.truetype(font_file, font_size)
 
-def animate_icon(image):
+def animate_icon(image, repeat=3):
     lock_ui.acquire()
 
-    for i in range(0, 3):
+    for i in range(0, repeat):
         # this is the original pimoroni function for drawing sprites
         for o_x in range(int(image.size[0] / width)):
             for o_y in range(int(image.size[1] / height)):
@@ -88,10 +88,10 @@ def animate_text(line):
 
     lock_ui.release()
 
-def icon(name):
+def icon(name, repeat=3):
     img = Image.open('icons/' + name + '.png')
 
-    _thread.start_new_thread(animate_icon, (img,))
+    _thread.start_new_thread(animate_icon, (img,repeat,))
 
 def text(line):
     _thread.start_new_thread(animate_text, (line,))
