@@ -58,6 +58,8 @@ The init.d-script will look for the file and in case it was found source it.
 PORT=1337 ./lemon.sh
 ```
 
+## Integrations
+
 ### GitHub Webhooks
 
 First, make Lemon's port (e.g. `20001`) accessible from the internet. You'll probably need to add a NAT rule to your firewall/router or fire up ngrok or something like that.
@@ -83,7 +85,7 @@ Build your Zapier zap and use `Webhooks` as an action. Configure the webhook lik
 
 ![Webhook Payload](docs/zapier-webhook-02.png)
 
-#### API
+## API
 
 The body of the webhook should contain of the following JSON:
 
