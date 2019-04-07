@@ -73,6 +73,16 @@ Build your IFTTT rule by specifying the `If this` service and using `Webhooks` a
 
 ![Webhook](docs/ifttt-make_a_web_request.png)
 
+### Zapier
+
+Like with IFTTT, you can send webhooks from Zapier to Lemon - using the very same endpoint you use for IFTTT. Configuration for Zapier is pretty easy as well:
+
+Build your Zapier zap and use `Webhooks` as an action. Configure the webhook like this:
+
+![Webhook POST](docs/zapier-webhook-01.png)
+
+![Webhook Payload](docs/zapier-webhook-02.png)
+
 #### API
 
 The body of the webhook should contain of the following JSON:
