@@ -1,9 +1,7 @@
 Lemon
 -----
 
-<p align="center">
-    ![Lemon](lemon-logo.png)
-</p>
+![Lemon](lemon-logo.png)
 
 LED Monitor, for monitoring all sort of stuff and getting notified when something happens.
 
