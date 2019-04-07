@@ -3,6 +3,15 @@ Lemon
 
 LED Monitor, for monitoring all sort of stuff and getting notified when something happens.
 
+![GitHub Commit](docs/github-commit.gif)
+
+![GitHub Fork](docs/github-fork.gif)
+
+![GitHub Docker/CI](docs/github-dockerci.gif)
+
+![IFTTT Twitter](docs/ifttt-twitter.gif)
+
+
 ## Requirements
 
 - WiFi
