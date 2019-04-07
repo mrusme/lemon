@@ -23,17 +23,38 @@ $ raspi-config nonint do_spi 0
 $ reboot
 $ aptitude install python3 python3-pip python3-dev python3-spidev libtiff5-dev libjpeg-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev tcl8.6-dev tk8.6-dev python-tk
 $ pip3 install gunicorn falcon pillow ujson unicornhathd
+$ cd /opt
 $ git clone https://github.com/mrusme/lemon.git
+$ ln -s /opt/lemon/init.d/lemon /etc/init.d/lemon
+$ update-rc.d lemon defaults
 ```
 
-## Running
+Lemon will now be run automatically every time your Raspberry starts.
+
+## Running manually
 
 ```bash
 $ cd lemon/
-$ gunicorn -b '0.0.0.0:20001' lemon:app
+$ ./lemon.sh
 ```
 
 ## Configuration
+
+### Port (on boot)
+
+You can change the port by creating a file named `/etc/lemon` and adding the follwing content to it:
+
+```bash
+export PORT=1337
+```
+
+The init.d-script will look for the file and in case it was found source it.
+
+### Port (manually)
+
+```bash
+PORT=1337 ./lemon.sh
+```
 
 ### GitHub Webhooks
 
