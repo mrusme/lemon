@@ -5,7 +5,7 @@ LED Monitor, for monitoring all sort of stuff and getting notified when somethin
 
 ![GitHub Commit](docs/github-commit.gif)
 
-[More examples here.](docs/)
+[More examples here.](https://github.com/mrusme/lemon/tree/master/docs)
 
 ## Requirements
 
@@ -119,5 +119,5 @@ curl -X "POST" "http://raspberrypi:20001/ifttt" \
 
 ## Kudos to ...
 
-- @pimoroni for their awesome hardware
-- @source-foundry for [Hack](https://github.com/source-foundry/Hack), the best Termin/Editor font there has ever been
+- [@pimoroni](https://github.com/pimoroni) for their awesome hardware
+- [@source-foundry](https://github.com/source-foundry) for [Hack](https://github.com/source-foundry/Hack), the best Termin/Editor font there has ever been
