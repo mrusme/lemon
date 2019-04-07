@@ -1,0 +1,35 @@
+#!/bin/sh
+#/etc/init.d/lemon
+
+### BEGIN INIT INFO
+# Provides:          lemon
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Startups script for lemon.py
+# Description:       https://github.com/mrusme/lemon
+### END INIT INFO
+
+if [ -f /etc/lemon ]
+then
+    . /etc/lemon
+fi
+
+case "$1" in
+    start)
+        echo "Starting lemon"
+        nohup /opt/lemon/lemon.sh &
+        ;;
+    stop)
+        echo "Stopping lemon"
+        kill $(ps aux | grep "[l]emon" | awk '{ print $2 }')
+        kill $(ps aux | grep "[g]unicorn" | awk '{ print $2 }')
+        ;;
+    *)
+        echo "Usage: /etc/init.d/lemon {start|stop}"
+        exit 1
+        ;;
+esac
+
+exit 0
