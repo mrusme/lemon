@@ -23,13 +23,12 @@ unicorn.rotation(270)
 unicorn.brightness(1)
 
 width, height = unicorn.get_shape()
-cycle_time = 0.10
 
 font_file = 'fonts/Hack-Regular.ttf'
 font_size = 12
 font = ImageFont.truetype(font_file, font_size)
 
-def animate_icon(image, repeat=3):
+def animate_icon(image, repeat=3, cycle_time=0.10):
     lock_ui.acquire()
 
     for i in range(0, repeat):
@@ -53,7 +52,7 @@ def animate_icon(image, repeat=3):
 
     lock_ui.release()
 
-def animate_text(line):
+def animate_text(line, cycle_time=0.10):
     lock_ui.acquire()
 
     text_width = width
@@ -88,10 +87,10 @@ def animate_text(line):
 
     lock_ui.release()
 
-def icon(name, repeat=3):
+def icon(name, repeat=3, cycle_time=0.10):
     img = Image.open('icons/' + name + '.png')
 
-    _thread.start_new_thread(animate_icon, (img,repeat,))
+    _thread.start_new_thread(animate_icon, (img,repeat,cycle_time,))
 
-def text(line):
-    _thread.start_new_thread(animate_text, (line,))
+def text(line, cycle_time=0.10):
+    _thread.start_new_thread(animate_text, (line,cycle_time,))
