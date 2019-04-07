@@ -106,6 +106,28 @@ By default, each icon animation is being repeated three times. However, you can 
 }
 ```
 
+Animation cycle time can also be adjusted individually, in order to allow smoohter playback of longer animations:
+
+```json
+{ 
+  "icon": "microsoft",
+  "icon_repeat": 1,
+  "icon_cycle_time": "0.01",
+  "text": "Micro$oft"
+}
+```
+
+The default font can be adjusted by specifying the `text_font` property. In order for this to work, the font needs to be available as `.ttf` file inside the `fonts/` directory. Example:
+
+```json
+{ 
+  "icon": "psy",
+  "text": "Oppa Gangnam Style!",
+  "text_font": "Hack-Regular"
+}
+```
+
+
 ## Testing
 
 ```bash
