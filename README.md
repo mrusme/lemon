@@ -5,12 +5,7 @@ LED Monitor, for monitoring all sort of stuff and getting notified when somethin
 
 ![GitHub Commit](docs/github-commit.gif)
 
-![GitHub Fork](docs/github-fork.gif)
-
-![GitHub Docker/CI](docs/github-dockerci.gif)
-
-![IFTTT Twitter](docs/ifttt-twitter.gif)
-
+[More examples here.](docs/)
 
 ## Requirements
 
