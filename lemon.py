@@ -81,6 +81,8 @@ class IftttResource(object):
             if 'icon' in body and 'text' in body:
                 repeat = 3
                 icon_cycle_time = 0.10
+                text_cycle_time = 0.10
+                text_font = None
 
                 if 'icon_repeat' in body:
                     repeat = int(body['icon_repeat'])
@@ -88,9 +90,12 @@ class IftttResource(object):
                 if 'icon_cycle_time' in body:
                     icon_cycle_time = float(body['icon_cycle_time'])
 
-                ledhat.icon(body['icon'], repeat, icon_cycle_time)
+                if 'text_font' in body:
+                    text_font = body['text_font']
+
+                ledhat.icon(body['icon'], repeat=repeat, cycle_time=icon_cycle_time)
                 time.sleep(.500)
-                ledhat.text(body['text'])
+                ledhat.text(body['text'], cycle_time=text_cycle_time, font=text_font)
                 resp.status = falcon.HTTP_204
             else:
                 resp.status = falcon.HTTP_400

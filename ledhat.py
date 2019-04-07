@@ -26,7 +26,7 @@ width, height = unicorn.get_shape()
 
 font_file = 'fonts/Hack-Regular.ttf'
 font_size = 12
-font = ImageFont.truetype(font_file, font_size)
+font_default = ImageFont.truetype(font_file, font_size)
 
 def animate_icon(image, repeat=3, cycle_time=0.10):
     lock_ui.acquire()
@@ -52,15 +52,22 @@ def animate_icon(image, repeat=3, cycle_time=0.10):
 
     lock_ui.release()
 
-def animate_text(line, cycle_time=0.10):
+def animate_text(line, cycle_time=0.10, font=None):
     lock_ui.acquire()
+
+    text_font = font_default
+
+    if font != None:
+        # TODO: Check whether file exists
+        custom_font_file = 'fonts/' + font + '.ttf'
+        text_font = ImageFont.truetype(custom_font_file, font_size)
 
     text_width = width
     text_height = 0
     text_x = width
     text_y = 2
 
-    w, h = font.getsize(line)
+    w, h = font_default.getsize(line)
     text_width += w + width
     text_height = max(text_height, h)
 
@@ -71,8 +78,8 @@ def animate_text(line, cycle_time=0.10):
 
     offset_left = 0
 
-    draw.text((text_x + offset_left, text_y), line, font=font, fill=(255,255,255,255))
-    offset_left += font.getsize(line)[0] + width
+    draw.text((text_x + offset_left, text_y), line, font=font_default, fill=(255,255,255,255))
+    offset_left += font_default.getsize(line)[0] + width
 
     for scroll in range(text_width - width):
         for x in range(width):
@@ -88,9 +95,10 @@ def animate_text(line, cycle_time=0.10):
     lock_ui.release()
 
 def icon(name, repeat=3, cycle_time=0.10):
+    # TODO: Check whether file exists
     img = Image.open('icons/' + name + '.png')
 
     _thread.start_new_thread(animate_icon, (img,repeat,cycle_time,))
 
-def text(line, cycle_time=0.10):
-    _thread.start_new_thread(animate_text, (line,cycle_time,))
+def text(line, cycle_time=0.10, font=None):
+    _thread.start_new_thread(animate_text, (line,cycle_time,font,))
