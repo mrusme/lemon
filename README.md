@@ -84,6 +84,17 @@ The body of the webhook should contain of the following JSON:
 
 You need to make sure that the icon name you specify actually exists within the `icons/` folder and is a `.png` file. If you want to use the icon `icons/docker.png`, simply specify `"icon": "docker"` in the JSON.
 
+## Testing
+
+```bash
+curl -X "POST" "http://raspberrypi:20001/ifttt" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "icon": "youtube",
+  "text": "New video on YouTube!"
+}'
+```
+
 ## Kudos to ...
 
 - @pimoroni for their awesome hardware
