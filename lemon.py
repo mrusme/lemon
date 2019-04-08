@@ -1,117 +1,41 @@
 #!/usr/bin/env python3
+# coding=utf8
+
+import os
 import falcon
-import json
-import ledhat
-import time
 
-class MiddlewareJson(object):
-    # Borrowed this from https://eshlox.net/2017/08/02/falcon-framework-json-middleware-loads-dumps/
-    def process_request(self, req, resp):
-        if req.content_length in (None, 0):
-            return
+from ledhat import LedHat
 
-        body = req.stream.read()
+from middleware_json import MiddlewareJson
 
-        if not body:
-            raise falcon.HTTPBadRequest(
-                'Empty request body. A valid JSON document is required.'
-            )
+from resource_github import ResourceGitHub
+from resource_api import ResourceApi
 
-        try:
-            req.context['request'] = json.loads(body.decode('utf-8'))
-        except (ValueError, UnicodeDecodeError):
-            raise falcon.HTTPError(
-                falcon.HTTP_753,
-                'Malformed JSON. Could not decode the request body.'
-                'The JSON was incorrect or not encoded as UTF-8.'
-            )
+class Lemon:
+    def __init__(self):
+        PUSHOVER_CONFIG = os.getenv('LEMON_PUSHOVER_CONFIG', None)
 
-    def process_response(self, req, resp, resource, req_succeeded):
-        if 'response' not in resp.context:
-            return
+        self._ledhat = LedHat()
+        self._ledhat.icon('lemon')
 
-        resp.body = json.dumps(
-            resp.context['response'],
-            default=json_serializer
-        )
+        self._app = falcon.API(middleware=[
+            MiddlewareJson(),
+        ])
 
-class GitHubResource(object):
-    def on_post(self, req, resp):
-        if req.context['request']:
-            body = req.context['request']
-            print(body)
+        self._ledhat.text('Lemon')
 
-            repository_name = '(null)'
-            repository_full_name = '(null)'
-            if 'repository' in body:
-                repository_name = body['repository']['name']
-                repository_full_name = body['repository']['full_name']
+        self._github = ResourceGitHub(ledhat=self._ledhat)
+        self._api = ResourceApi(ledhat=self._ledhat)
 
-            if 'head_commit' in body and 'id' in body['head_commit']:
-                committer_username = '@' + body['head_commit']['committer']['username']
-                commit_message = body['head_commit']['message']
+        self._app.add_route('/api', self._api)
+        self._app.add_route('/ifttt', self._api)
+        self._app.add_route('/zapier', self._api)
+        self._app.add_route('/github', self._github)
 
-                text = 'New commit by ' + committer_username + ' in ' + repository_full_name + ': ' + commit_message
-                ledhat.icon('octocat')
-                time.sleep(.500)
-                ledhat.text(text)
-            elif 'forkee' in body and body['forkee']['fork'] == True:
-                full_name = body['forkee']['full_name']
-                text = repository_full_name + ' was forked to ' + full_name
-                ledhat.icon('fork')
-                time.sleep(.500)
-                ledhat.text(text)
-            elif 'context' in body and body['context'] == 'ci/dockercloud':
-                description = body['description']
-                text = repository_full_name + ': ' + description
-                ledhat.icon('docker')
-                time.sleep(.500)
-                ledhat.text(text)
+        self._pushover_client = None
+        if PUSHOVER_CONFIG != None and PUSHOVER_CONFIG != '':
+            from plugin_pushover import Pushover
+            self._pushover_client = Pushover(config=PUSHOVER_CONFIG, ledhat=self._ledhat)
 
-            resp.status = falcon.HTTP_204
-        else:
-            resp.status = falcon.HTTP_500
-
-class IftttResource(object):
-    def on_post(self, req, resp):
-        if req.context['request']:
-            body = req.context['request']
-            print(body)
-
-            if 'icon' in body and 'text' in body:
-                repeat = 3
-                icon_cycle_time = 0.10
-                text_cycle_time = 0.10
-                text_font = None
-
-                if 'icon_repeat' in body:
-                    repeat = int(body['icon_repeat'])
-
-                if 'icon_cycle_time' in body:
-                    icon_cycle_time = float(body['icon_cycle_time'])
-
-                if 'text_font' in body:
-                    text_font = body['text_font']
-
-                ledhat.icon(body['icon'], repeat=repeat, cycle_time=icon_cycle_time)
-                time.sleep(.500)
-                ledhat.text(body['text'], cycle_time=text_cycle_time, font=text_font)
-                resp.status = falcon.HTTP_204
-            else:
-                resp.status = falcon.HTTP_400
-        else:
-            resp.status = falcon.HTTP_500
-
-app = falcon.API(middleware=[
-    MiddlewareJson(),
-])
-
-
-ledhat.icon('lemon')
-time.sleep(.500)
-ledhat.text('Lemon')
-
-github = GitHubResource()
-ifttt = IftttResource()
-app.add_route('/github', github)
-app.add_route('/ifttt', ifttt)
+lemon = Lemon()
+app = lemon._app
