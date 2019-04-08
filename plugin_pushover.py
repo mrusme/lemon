@@ -2,6 +2,7 @@
 # coding=utf8
 
 import os
+import sys
 from pushover_open_client import Client
 
 class Pushover:
@@ -18,30 +19,45 @@ class Pushover:
         self._client.getWebSocketMessages(self._pushoverClientCallback)
 
     def _pushoverClientCallback(self, messageList):
-        if(messageList):
-            for message in messageList:
-                print(message)
-                print(message.id)
-                print(message.uuid)
-                print(message.title)
-                print(message.message)
-                print(message.app)
-                print(message.aid)
-                print(message.icon)
-                print(message.data)
-                print(message.priority)
-                print(message.sound)
-                print(message.url)
-                print(message.url_title)
-                print(message.acked)
-                print(message.receipt)
-                print(message.html)
+        try:
+            if(messageList):
+                for message in messageList:
+                    print(" id={0}, umid={1}, title={2}, message={3}, app={4}, aid={5}, icon={6}, date={7}, priority={8}, sound={9}, url={10}, url_title={11}, acked={12}, receipt={13}, html={14}, ".format(
+                    message.id,
+                    message.umid,
+                    message.title,
+                    message.message,
+                    message.app,
+                    message.aid,
+                    message.icon,
+                    message.date,
+                    message.priority,
+                    message.sound,
+                    message.url,
+                    message.url_title,
+                    message.acked,
+                    message.receipt,
+                    message.html
+                    ))
 
-                # Only show messages with priority greater/equal 0
-                if message.priority >= 0:
-                    self._ledhat.icon('pushover-prio-' + message.priority)
-                    self._ledhat.text(message.app + ': ' + message.title + ' -> ' + message.message)
+                    # Only show messages with priority greater/equal 0
+                    if message.priority >= 0:
+                        the_text = ''
 
-                if(message.priority >= 2):
-                    pushover_client.acknowledgeEmergency(message.receipt)
-            pushover_client.deleteMessages(messageList[-1].id)
+                        if message.app != None and message.app != '':
+                            the_text = the_text + message.app + ': '
+                        if message.title != None and message.title != '':
+                            the_text = the_text + message.title
+                        if message.message != None and message.message != '':
+                            the_text = the_text + ' -> ' + message.message.replace('\n', ' ')
+
+                        self._ledhat.icon('pushover-prio-' + str(message.priority))
+                        self._ledhat.text(the_text)
+                    if(message.priority >= 2):
+                        print("Ack message")
+                        self._client.acknowledgeEmergency(message.receipt)
+                print("Deleting message")
+                self._client.deleteMessages(messageList[-1].id)
+        except:
+            print("Exception:")
+            print(sys.exc_info())
