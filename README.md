@@ -42,7 +42,7 @@ $ ./lemon.sh
 
 ### Port (on boot)
 
-You can change the port by creating a file named `/etc/lemon` and adding the follwing content to it:
+You can change the port by creating a file named `/etc/lemon` and adding the following content to it:
 
 ```bash
 export PORT=1337
@@ -83,13 +83,15 @@ Build your Zapier zap and use `Webhooks` as an action. Configure the webhook lik
 
 ![Webhook Payload](docs/zapier-webhook-02.png)
 
-### Pushover (still in development)
+### Pushover
 
-Lemon provides an integration into Pushover using the Open Client API. Herefor, a separate config needs to be created, which will be read from/written to by Lemon. See [lemon-pushover.cfg](lemon-pushover.cfg) for an example configuration. In order to activate the Pushover plug-in, the environment variable `LEMON_PUSHOVER_CONFIG` needs to be set to the location of your `lemon-pushover.cfg`, e.g. `LEMON_PUSHOVER_CONFIG=/etc/lemon-pushover.cfg`. Make sure that the file is read and writable by the user you run Lemon under!
+Lemon provides an integration into Pushover using the Open Client API. Therefor, a separate config needs to be created, which will be read from/written to by Lemon. See [lemon-pushover.cfg](lemon-pushover.cfg) for an example configuration. In order to activate the Pushover plug-in, the environment variable `LEMON_PUSHOVER_CONFIG` needs to be set to the location of your `lemon-pushover.cfg`, e.g. `LEMON_PUSHOVER_CONFIG=/etc/lemon-pushover.cfg`. Make sure that the file is read and writable by the user you run Lemon under!
 
-Lemon will register a new device in your Pushover account (named `lemon`). This device can be targeted by other Pushover clients and it will of course also receive all untargeted notifications. Be aware that you'll need a [Pushover desktop license](https://pushover.net/clients) in order to use this feature. However, they do provide a 7-day-trial for you to test it.
+Lemon will register a new device in your Pushover account (named `lemon`). This device can be targeted by other Pushover clients and it will of course also receive all un-targeted notifications. Be aware that you'll need a [Pushover desktop license](https://pushover.net/clients) in order to use this feature. However, they do provide a 7-day-trial for you to test it.
 
 If don't want to fiddle around with DynDNS, NAT or ngrok in order to make Lemon's HTTP port reachable from GitHub, IFTTT, Zapier and other webhook providers, you can set up Lemon to only use Pushover, which doesn't require you to expose any port. The Pushover client implementation uses a websocket to connect to the Pushover API and retrieve notifications. It basically acts like a web browser, hence you'll be able to use it even within networks you have no/little control over.
+
+**Info regarding 2FA (2 Factor Authentication)**: For Pushover Open Client API integration, Lemon uses [jonogreenz/py-pushover-open-client](https://github.com/jonogreenz/py-pushover-open-client/). However, this library did not natively support 2FA, but a [PR was set](https://github.com/jonogreenz/py-pushover-open-client/pull/6) to the author of the library to include a possibility for an initial 2FA authentication. As soon as this PR was accepted and a new version of the library was released, 2FA will be available here as well.
 
 ## API
 
@@ -114,7 +116,7 @@ By default, each icon animation is being repeated three times. However, you can 
 }
 ```
 
-Animation cycle time can also be adjusted individually, in order to allow smoohter playback of longer animations:
+Animation cycle time can also be adjusted individually, in order to allow smoother playback of longer animations:
 
 ```json
 { 
@@ -150,3 +152,7 @@ curl -X "POST" "http://raspberrypi:20001/ifttt" \
 
 - [@pimoroni](https://github.com/pimoroni) for their awesome hardware
 - [@source-foundry](https://github.com/source-foundry) for [Hack](https://github.com/source-foundry/Hack), the best Termin/Editor font there has ever been
+
+## "Let me tell you..."
+
+Sure, [tell me](https://twitter.com/intent/tweet?text=@mrusme%20regarding%20Lemon,%20let%20me%20tell%20you%20that...)!
