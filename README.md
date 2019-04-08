@@ -22,7 +22,7 @@ On your Raspberry:
 $ raspi-config nonint do_spi 0
 $ reboot
 $ aptitude install python3 python3-pip python3-dev python3-spidev libtiff5-dev libjpeg-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev tcl8.6-dev tk8.6-dev python-tk
-$ pip3 install gunicorn falcon pillow ujson unicornhathd
+$ pip3 install gunicorn falcon pillow ujson unicornhathd py-pushover-open-client
 $ cd /opt
 $ git clone https://github.com/mrusme/lemon.git
 $ ln -s /opt/lemon/init.d/lemon /etc/init.d/lemon
@@ -75,7 +75,7 @@ Build your IFTTT rule by specifying the `If this` service and using `Webhooks` a
 
 ### Zapier
 
-Like with IFTTT, you can send webhooks from Zapier to Lemon - using the very same endpoint you use for IFTTT. Configuration for Zapier is pretty easy as well:
+Like with IFTTT, you can send webhooks from Zapier to Lemon. Configuration for Zapier is pretty easy as well:
 
 Build your Zapier zap and use `Webhooks` as an action. Configure the webhook like this:
 
@@ -83,9 +83,17 @@ Build your Zapier zap and use `Webhooks` as an action. Configure the webhook lik
 
 ![Webhook Payload](docs/zapier-webhook-02.png)
 
+### Pushover (still in development)
+
+Lemon provides an integration into Pushover using the Open Client API. Herefor, a separate config needs to be created, which will be read from/written to by Lemon. See [lemon-pushover.cfg](lemon-pushover.cfg) for an example configuration. In order to activate the Pushover plug-in, the environment variable `LEMON_PUSHOVER_CONFIG` needs to be set to the location of your `lemon-pushover.cfg`, e.g. `LEMON_PUSHOVER_CONFIG=/etc/lemon-pushover.cfg`. Make sure that the file is read and writable by the user you run Lemon under!
+
+Lemon will register a new device in your Pushover account (named `lemon`). This device can be targeted by other Pushover clients and it will of course also receive all untargeted notifications. Be aware that you'll need a [Pushover desktop license](https://pushover.net/clients) in order to use this feature. However, they do provide a 7-day-trial for you to test it.
+
+If don't want to fiddle around with DynDNS, NAT or ngrok in order to make Lemon's HTTP port reachable from GitHub, IFTTT, Zapier and other webhook providers, you can set up Lemon to only use Pushover, which doesn't require you to expose any port. The Pushover client implementation uses a websocket to connect to the Pushover API and retrieve notifications. It basically acts like a web browser, hence you'll be able to use it even within networks you have no/little control over.
+
 ## API
 
-The body of the webhook should contain of the following JSON:
+You can also attach any other service by using the generic Lemon API, which is accessible through `http://yourdns:20001/api`. The body of the requests/webhooks should contain the following JSON:
 
 ```json
 { 
@@ -126,7 +134,6 @@ The default font can be adjusted by specifying the `text_font` property. In orde
   "text_font": "Hack-Regular"
 }
 ```
-
 
 ## Testing
 
