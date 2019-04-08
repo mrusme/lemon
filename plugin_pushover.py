@@ -13,8 +13,10 @@ class Pushover:
         self._ledhat = ledhat
         self._lemon_config = config
         self._client = Client(self._lemon_config)
-        self._client.login()
-        self._client.registerDevice('lemon')
+        if self._client.secret == None or self._client.secret == "":
+            self._client.login()
+        if self._client.deviceID == None or self._client.deviceID == "":
+            self._client.registerDevice('lemon')
         self._client.writeConfig(self._lemon_config)
         self._client.getWebSocketMessages(self._pushoverClientCallback)
 
