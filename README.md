@@ -1,11 +1,11 @@
 Lemon
 -----
 
-LED Monitor, for monitoring all sort of stuff and getting notified when something happens.
+Lemon – *LE*D *Mon*itor – is a [$79.43](docs/pimoroni-shop.png) opensource alternative to [LaMetric](https://lametric.com) that supports [GitHub-](https://developer.github.com/webhooks/), [IFTTT-](https://ifttt.com/maker_webhooks) and [Zapier-webhooks](https://zapier.com/apps/webhook/) and even integrates with [Pushover](https://pushover.net)!
 
 ![GitHub Commit](docs/github-commit.gif)
 
-[More examples here.](https://github.com/mrusme/lemon/tree/master/docs)
+More examples [here](docs/github-dockerci.md), [here](docs/github-fork.md), [here](docs/ifttt-twitter.md) & [here](docs/pushover.md).
 
 ## Requirements
 
