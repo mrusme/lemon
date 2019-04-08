@@ -1,7 +1,7 @@
 Lemon
 -----
 
-Lemon – *LE*D *Mon*itor – is a [$79.43](docs/pimoroni-shop.md) opensource alternative to [LaMetric](https://lametric.com) that supports [GitHub-](https://developer.github.com/webhooks/), [IFTTT-](https://ifttt.com/maker_webhooks) and [Zapier-webhooks](https://zapier.com/apps/webhook/) and even integrates with [Pushover](https://pushover.net)!
+Lemon – **LE**D **Mon**itor – is a [$79.43](docs/pimoroni-shop.md) opensource alternative to [LaMetric](https://lametric.com) that supports [GitHub-](https://developer.github.com/webhooks/), [IFTTT-](https://ifttt.com/maker_webhooks) and [Zapier-webhooks](https://zapier.com/apps/webhook/) and even integrates with [Pushover](https://pushover.net)!
 
 ![GitHub Commit](docs/github-commit.gif)
 
