@@ -91,7 +91,7 @@ Lemon will register a new device in your Pushover account (named `lemon`). This 
 
 If don't want to fiddle around with DynDNS, NAT or ngrok in order to make Lemon's HTTP port reachable from GitHub, IFTTT, Zapier and other webhook providers, you can set up Lemon to only use Pushover, which doesn't require you to expose any port. The Pushover client implementation uses a websocket to connect to the Pushover API and retrieve notifications. It basically acts like a web browser, hence you'll be able to use it even within networks you have no/little control over.
 
-**Info regarding 2FA (2 Factor Authentication)**: For Pushover Open Client API integration, Lemon uses [jonogreenz/py-pushover-open-client](https://github.com/jonogreenz/py-pushover-open-client/). However, this library did not natively support 2FA, but a [PR was set](https://github.com/jonogreenz/py-pushover-open-client/pull/6) to the author of the library to include a possibility for an initial 2FA authentication. As soon as this PR was accepted and a new version of the library was released, 2FA will be available here as well.
+**Info regarding 2FA (2 Factor Authentication)**: For Pushover Open Client API integration, Lemon uses [jonogreenz/py-pushover-open-client](https://github.com/jonogreenz/py-pushover-open-client/). However, this library did not natively support 2FA, but a [PR was set](https://github.com/jonogreenz/py-pushover-open-client/pull/6) to the author of the library to include a possibility for an initial 2FA authentication. This PR was accepted and is available since v1.3.0 of the library. If you need 2FA make sure you `pip3 install` the latest version of the library!
 
 ## API
 
