@@ -31,6 +31,5 @@ class MiddlewareJson(object):
             return
 
         resp.body = json.dumps(
-            resp.context['response'],
-            default=json_serializer
+            resp.context['response']
         )
