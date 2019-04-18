@@ -22,7 +22,6 @@ class Influx:
             self._client = InfluxDBClient(host=host, use_udp=True, udp_port=port, database=database, username=username, password=password)
 
     def write(self, resource, icon, category="undefined"):
-        global orientation
         json_data = []
 
         if self._client == None:
