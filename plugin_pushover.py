@@ -6,11 +6,12 @@ import sys
 from pushover_open_client import Client
 
 class Pushover:
-    def __init__(self, config=None, ledhat=None):
+    def __init__(self, config=None, ledhat=None, influx=None):
         if config == None or config == '':
             return
 
         self._ledhat = ledhat
+        self._influx = influx
         self._lemon_config = config
         self._client = Client(self._lemon_config)
         if self._client.secret == None or self._client.secret == "":
@@ -53,8 +54,15 @@ class Pushover:
                         if message.message != None and message.message != '':
                             the_text = the_text + ' -> ' + message.message.replace('\n', ' ')
 
-                        self._ledhat.icon('pushover-prio-' + str(message.priority))
-                        self._ledhat.text(the_text)
+                        icon = 'pushover-prio-' + str(message.priority)
+                        text = the_text
+                        category = 'priority-' + str(message.priority)
+                        self._ledhat.icon(icon)
+                        self._ledhat.text(text)
+
+                        if self._influx != None:
+                            self._influx.write(resource='pushover', icon=icon, category=category)
+
                     if(message.priority >= 2):
                         print("Ack message")
                         self._client.acknowledgeEmergency(message.receipt)

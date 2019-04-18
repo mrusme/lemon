@@ -4,8 +4,9 @@
 import falcon
 
 class ResourceGitHub(object):
-    def __init__(self, ledhat=None):
+    def __init__(self, ledhat=None, influx=None):
         self._ledhat = ledhat
+        self._influx = influx
 
     def on_post(self, req, resp):
         if req.context['request']:
@@ -14,6 +15,10 @@ class ResourceGitHub(object):
 
             repository_name = '(null)'
             repository_full_name = '(null)'
+            icon = None
+            text = None
+            category = 'undefined'
+
             if 'repository' in body:
                 repository_name = body['repository']['name']
                 repository_full_name = body['repository']['full_name']
@@ -22,19 +27,25 @@ class ResourceGitHub(object):
                 committer_username = '@' + body['head_commit']['committer']['username']
                 commit_message = body['head_commit']['message']
 
+                icon = 'octocat'
                 text = 'New commit by ' + committer_username + ' in ' + repository_full_name + ': ' + commit_message
-                ledhat.icon('octocat')
-                self._ledhat.text(text)
+                category = 'github_commit'
             elif 'forkee' in body and body['forkee']['fork'] == True:
                 full_name = body['forkee']['full_name']
+                icon = 'fork'
                 text = repository_full_name + ' was forked to ' + full_name
-                self._ledhat.icon('fork')
-                self._ledhat.text(text)
+                category = 'github_fork'
             elif 'context' in body and body['context'] == 'ci/dockercloud':
                 description = body['description']
+                icon = 'docker'
                 text = repository_full_name + ': ' + description
-                self._ledhat.icon('docker')
-                self._ledhat.text(text)
+                category = 'github_ci_dockercloud'
+
+            self._ledhat.icon('octocat')
+            self._ledhat.text(text)
+
+            if self._influx != None:
+                self._influx.write(resource=req.path.replace('/','_'), icon=icon, category=category)
 
             resp.status = falcon.HTTP_204
         else:
