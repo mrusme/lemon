@@ -22,7 +22,11 @@ On your Raspberry:
 $ raspi-config nonint do_spi 0
 $ reboot
 $ aptitude install python3 python3-pip python3-dev python3-spidev libtiff5-dev libjpeg-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev tcl8.6-dev tk8.6-dev python-tk
-$ pip3 install gunicorn falcon pillow ujson unicornhathd py-pushover-open-client
+$ pip3 install gunicorn falcon pillow ujson unicornhathd
+$ # If you want to enable Pushover integration:
+$ pip3 install py-pushover-open-client
+$ # If you want to enable InfluxDB integration:
+$ pip3 install influxdb
 $ cd /opt
 $ git clone https://github.com/mrusme/lemon.git
 $ ln -s /opt/lemon/init.d/lemon /etc/init.d/lemon
@@ -85,13 +89,26 @@ Build your Zapier zap and use `Webhooks` as an action. Configure the webhook lik
 
 ### Pushover
 
-Lemon provides an integration into Pushover using the Open Client API. Therefor, a separate config needs to be created, which will be read from/written to by Lemon. See [lemon-pushover.cfg](lemon-pushover.cfg) for an example configuration. In order to activate the Pushover plug-in, the environment variable `LEMON_PUSHOVER_CONFIG` needs to be set to the location of your `lemon-pushover.cfg`, e.g. `LEMON_PUSHOVER_CONFIG=/etc/lemon-pushover.cfg`. Make sure that the file is read and writable by the user you run Lemon under!
+Lemon provides an integration into Pushover using the Open Client API. Therefor, a separate config needs to be created, which will be read from/written to by Lemon. See [lemon-pushover.cfg](lemon-pushover.cfg) for an example configuration. In order to activate the Pushover plug-in, the environment variable `LEMON_PUSHOVER_CONFIG` needs to be set to the location of your `lemon-pushover.cfg`, e.g. `LEMON_PUSHOVER_CONFIG=/etc/lemon-pushover.cfg`. Make sure that the file is read and writable by the user you run Lemon under! You can set that environment variable within `/etc/lemon`, just like with `PORT` (see above).
 
 Lemon will register a new device in your Pushover account (named `lemon`). This device can be targeted by other Pushover clients and it will of course also receive all un-targeted notifications. Be aware that you'll need a [Pushover desktop license](https://pushover.net/clients) in order to use this feature. However, they do provide a 7-day-trial for you to test it.
 
 If don't want to fiddle around with DynDNS, NAT or ngrok in order to make Lemon's HTTP port reachable from GitHub, IFTTT, Zapier and other webhook providers, you can set up Lemon to only use Pushover, which doesn't require you to expose any port. The Pushover client implementation uses a websocket to connect to the Pushover API and retrieve notifications. It basically acts like a web browser, hence you'll be able to use it even within networks you have no/little control over.
 
 **Info regarding 2FA (2 Factor Authentication)**: For Pushover Open Client API integration, Lemon uses [jonogreenz/py-pushover-open-client](https://github.com/jonogreenz/py-pushover-open-client/). However, this library did not natively support 2FA, but a [PR was set](https://github.com/jonogreenz/py-pushover-open-client/pull/6) to the author of the library to include a possibility for an initial 2FA authentication. This PR was accepted and is available since v1.3.0 of the library. If you need 2FA make sure you `pip3 install` the latest version of the library!
+
+### InfluxDB
+
+In order to use InfluxDB, simply add the configuration to your `/etc/lemon`:
+
+```
+export LEMON_INFLUXDB_SERVER=your-influxdb-server.local
+export LEMON_INFLUXDB_PORT=8086
+export LEMON_INFLUXDB_UDP=1
+export LEMON_INFLUXDB_DB=your-database
+export LEMON_INFLUXDB_USER=you-user
+export LEMON_INFLUXDB_PASS=your-user-password
+```
 
 ## API
 
@@ -134,6 +151,16 @@ The default font can be adjusted by specifying the `text_font` property. In orde
   "icon": "psy",
   "text": "Oppa Gangnam Style!",
   "text_font": "Hack-Regular"
+}
+```
+
+In order to be able to categorize notifications, in case InfluxDB is being used, a category can be passed via JSON:
+
+```json
+{ 
+  "icon": "twitter",
+  "text": "New tweet!",
+  "category": "twitter"
 }
 ```
 
