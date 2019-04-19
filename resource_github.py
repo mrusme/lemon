@@ -11,11 +11,10 @@ class ResourceGitHub(object):
     def on_post(self, req, resp):
         if req.context['request']:
             body = req.context['request']
-            print(body)
 
             repository_name = '(null)'
             repository_full_name = '(null)'
-            icon = None
+            icon = 'octocat'
             text = None
             category = 'undefined'
 
@@ -40,8 +39,17 @@ class ResourceGitHub(object):
                 icon = 'docker'
                 text = repository_full_name + ': ' + description
                 category = 'github_ci_dockercloud'
+            elif 'hook' in body and 'active' in body['hook']:
+                icon = 'octocat'
+                text = 'Hook for ' + repository_full_name + ' became ' + ('active' if body['hook']['active'] == True else 'inactive') + '!'
+                category = 'github_webhook_status'
+            else:
+                print("Unhandled webhook:")
+                print(body)
+                resp.status = falcon.HTTP_204
+                return
 
-            self._ledhat.icon('octocat')
+            self._ledhat.icon(icon)
             self._ledhat.text(text)
 
             if self._influx != None:

@@ -32,6 +32,10 @@ class LedHat:
         self._default_font = ImageFont.truetype(self._default_font_file, self._default_font_size)
 
     def _animate_icon(self, image, repeat=3, cycle_time=0.10):
+        if image == None or type(image) is str == False:
+            print("Not a string:", image)
+            return
+
         self._lock_ui.acquire()
 
         for i in range(0, repeat):
@@ -56,6 +60,10 @@ class LedHat:
         self._lock_ui.release()
 
     def _animate_text(self, line, cycle_time=0.10, font=None):
+        if line == None or type(line) is str == False:
+            print("Not a string:", line)
+            return
+
         self._lock_ui.acquire()
 
         text_font = self._default_font
@@ -63,14 +71,17 @@ class LedHat:
         if font != None:
             # TODO: Check whether file exists
             custom_self._default_font_file = 'fonts/' + font + '.ttf'
-            text_font = ImageFont.truetype(custom_self._default_font_file, self._default_font_size)
+            try:
+                text_font = ImageFont.truetype(custom_self._default_font_file, self._default_font_size)
+            except IOError:
+                text_font = self._default_font
 
         text_width = self._unicorn_width
         text_height = 0
         text_x = self._unicorn_width
         text_y = 2
 
-        w, h = self._default_font.getsize(line)
+        w, h = text_font.getsize(line)
         text_width += w + self._unicorn_width
         text_height = max(text_height, h)
 
