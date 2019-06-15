@@ -36,7 +36,7 @@ class ResourceGitHub(object):
                 category = 'github_fork'
             elif 'context' in body and body['context'] == 'ci/dockercloud':
                 description = body['description']
-                icon = 'docker'
+                icon = 'docker' if body['state'] != 'success' and body['state'] != 'failure' else 'docker-' + body['state']
                 text = repository_full_name + ': ' + description
                 category = 'github_ci_dockercloud'
             elif 'hook' in body and 'active' in body['hook']:
