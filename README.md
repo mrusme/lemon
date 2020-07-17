@@ -11,7 +11,7 @@ More examples [here](docs/github-dockerci.md), [here](docs/github-fork.md), [her
 
 - WiFi
 - A Raspberry Pi with a [Pimoroni Unicorn Hat HD](https://shop.pimoroni.de/products/unicorn-hat-hd)
-- Raspbian on its microSD card
+- [Raspbian Desktop](https://github.com/mrusme/lemon/issues/2) (not lite/headless!) on its microSD card
 - A GitHub account
 
 ## Installation
