@@ -1,4 +1,0 @@
-Pushover
---------
-
-![Pushover](pushover.gif)

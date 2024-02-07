@@ -5,18 +5,17 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 indent_style = space
-indent_size = 4
+indent_size = 2
 insert_final_newline = true
+max_line = 80
 
 [*.{md,markdown}]
 trim_trailing_whitespace = false
 
-[*.yml]
-indent_style = space
-indent_size = 2
-max_line = 80
-
-[Makefile]
+[*.go]
 indent_style = tab
-indent_size = 4
-max_line = 80
+indent_size = 2
+
+[{Makefile,Makefile.*}]
+indent_style = tab
+indent_size = 2
