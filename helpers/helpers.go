@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"image"
 	"image/png"
@@ -9,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 )
+
+const dummyImage = "iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAACXBIWXMAAA7EAAAOxAGVKw4bAAASnklEQVR42rWcfZBddXnHP9/fvWw3m2XJ4LrGlQlLDJvNDqVCkVJKrVOo0BFBIwPZgo5FAStv4U0aeUlREWlAC2jH4lBEkPBSU14sVgsWYxSLkVKGIS+bppCmTMzEsLuEZdncnG//OGfv3nvuOefeDcnJnNxzz33O8/v9nt/z/jxnxX48RoYGr8RegXhV6PSDVr60NgMsAFETVHkwdfdHhha1Cx0NrD1o5UuTOc9m4cqFCfuTQNjvRyDUa3h0dMmi40aGBsM+Ig7J/QCEkaHBAczD4B8a+mrWVoVJ4QqtwOw3Ao0ODZaRjhQCQNCL9LjgjNGhwXLNxJodUZNx2kaXDJ4v+98lnYrVIehNPRelCJOFOxNm/3GQ6RHMs41tiM9u2/fYvm5kyaL2FsfPhBlZMhhGlywasP0w4puguWAsl4FDCjgxKiB8A0xIsVpLk8tg0cZDDALtAFLyn4REu6TrJT08OjTY08IYDfMYGRpsB19k8XNJpwIBgS2EMD4k9UwWntAKTLkV5TcDHRGAaHTJomB8jFCQ1EC5hMVOxfrZ6NDgXxr/Ys7KdaTx1OiGKXEKwCD4NqQPAsE2U2NMDSV0aMb8QhpfKzDlJsovSimyNEHSMhtNzVTmqDp6ZLAYYgHwONay0aHBfzxo5UuV0aHBqXmVbUKy6AqmA/xJrGuQuqexaEqkqbnsyyFGlv4phFEL3BMyZDYUEWh0aLAN+78MA5Kwa+ikWB1NM5ZjAqDHgFeJ9VY30Am0CUWISaAL3IcVqoR3xgbYgF60+L05K1+KMjicJma+DqbcgtWIZgpj6JbUp6kJV4miWGEDpsa+2WXLi0lgpplMdQu3kicTPI3iW+XMucnaJpvo0zxmoJmIva1DgUFD+9QmTxOudstdJdLewjjFSDUwcwRzgO0pdRAyTDtFMPuFQJR8LKlF1fFXda/9tmDypCxZV29CIAp0TdTEau97R3Hs3IFAyUepZOKTms+p6/ik7reZw1ADQ/V+fFL2hWPnLuooUAVRC45pVN4L977YPyzRiXWEUnzQuNfTOsh7DaMaYZzWbMm45yIOHjtv4GKkbV13rturDS/naPaoBUI1PDf62UXtMlcb9zuZvqtLU50ApRfWAGNFgl2GEcEuYFIQjDoF3UCXNY1JKSKBAngxaBBxNvB8E4sWsiyaZmjec/2FsQsXdWO+iTkDCC5ygbI1zg7BWuAZ7LWgTcbbhSaAyIAMFkHQAZ5nOFbSiYYPCOYWDLEDMYT4Sdc31zXz+er8J70dcZpC9PrFi3oxDxuOm+Hz45jVwL3A01jbu/7+pUqL6Y3Ya79wMMjuQZwCnIc4Nsf4jEicbfGvXbevK5KSOmKpBU7JV8iXDQQiHQJ8X+YYpyxLlpglMBNGjwluJfJzB35jfaUVLm3KxRcPdEg6CbgGfIxRnYgYdkoMEXjywK+vS3NQJke1KgW8fvmiYNwhqSeJlnsxCwxnYw8oZZDTOqdGgT4vcxXw9IF/ty5qYXNCC9F33QJfv3RRO8GfMSwX02FJMrFtxh/p+tr6tU3itKgaKe36/KJgiJWf6XHsQxwCfg9mHjAP1EusHDvJVLdFGkbxgOZ28HUH3rp+137wvhrEcuyKRX3CdyCdmnInX0Y68cAV6zY3w5MQaOBM4LY43qFtSobT1qZlUjTe2wVcRqTvdN6yrjITd2LXsoEAtNu0xWEGk1gTnV9dH7WSMt111aIOy58T3AB01Didv1Tg5M6vrh8rwiOA1/96oFfyU4aBAu+0KkBKXTeBGcGcJ2tV583rm+q5169dGGR6MMcBf4I5MvGK26uKHbYiXjT8TPCsg7cf+OWNlVwiXz0QLE6R/O0E19Qa70Rc3PmVDZMFOYcEyTULT0M8nHBQg8uf8UhGFNRA3nHMpx3poQNvWl9old64vj/YWoC5DDgN3EuGym/cGu8APYn4B+AXEpXZX9yQOdauLyw8EvG9OJlnQBFwIYE7O+NnGji6mlFUiScU+K6CmT6FAsnn1DXJb1P309eqwhB8tUoUESee+PL+LosvSfxagc8quHd6LBWMZRTUrcASiack/xvilDf+ZmE5K1vY+ZUNLxD4sIKfTfAGBW5CPjYvo1gnIW8sXzgX8Qxxwim1Z3VufINuytBX38E+b/YNG6OC/Et444aFC4B7bI5TE11XMFbtUbH4gcRVwObZ129oMOXJOh8ETkhuvWD5xM7lG3dmycu0QrthYUAslrwSVM7WNAWqeOra2mT4o87rN+zISCEEIBr/8sJgMwj8M3hB86U7J17LJemrwKUSj3Rcu6GSjtTf+OLCucDjiKOTdX5L0oUd127IT4p3Lt8QKfAI4iHFgldl8RphrH5vFANQUIXgazqv37A9p4IQATh4roIfVGBBNp70GNkwjd+rZy/B9xC4ZPym/nSZKZp9/YZtBM4ieGOiQs4l8KHxmxbWzTNd5mD2tRsqlLSM4C0KxrEumdIpmafrP1erpEcK44uv9rcRuI3AYPwcGXiqeiwieMyBMYKj1FiF81Ggw/LNiKXjN/c3eN6zr92wWYGzHbyd4DbkW5E7a2Ey80Gzl23YQuBqgitTA9ZO2omydGpSClQIrOhYlm82E349U/Ji5yxOgQkCjxAYInAYgXcr8G4ChxJ8OoH7Y6I1bpBrNjO5X0bchPiL8RX9DdzcsWzjWgKfdvC4gwcd/NkErjCjGJBXEfRhwTm1IYTrgghVk6KO/70ga00h99zSPwe4OhHWGs1SxfwTzDLMcx2f35gOXMeBreN/2/8EYoHEdYYzhNqyjMd0gtZlwR2gF5O0R52LIfGExXJJK4wvNtwPbG0ai43fevg8xE+nrFoLxzUdlw9/pRDn1w7/KPD9jPRmBfMNrOs6rtzYUijyxi39bZIXI75Ocbpj6lgj8eFZlw2PNeC6tb9d8t3AEsTVErfMWjochaIIWSW2KnAFJUeZac3qp6FEpMCPm1VlVeJ0Sg6k8BC4XyWuziBObgV39pUbJ1XiIQVOJrCRZC71c6sb5wQCnxm//fAGfLOv2DipwIUKPEvwEIo995CyZHVWbdbS4YjAI5JW11oWaiyMlTiH4lUCGzOsY/X6zTsOLxM4etoyJnpN7FTwl2YtHa5kPBsV4GTW0mFmLR2OHUCxnqDq3NCUPmJKaUPgColDsgg/a+nwTgfOlrQR0ZZO2kepEyDMumQ4osRap4hTJVIpnhAlNrrEeMoy1ilEB9oJ9NS6DMmzqx20OeuZDO7J6sIIHZcMbyYwpMD2Kv6SpseoftJL4II8r16BzQ6cTWCsqJhW/1ugSzkEqjlfVnB68nV5llquSZ0vdFw03DTPk9NsUCWoAy8QWEYgajLXT735rcO7s/DMumiYjouGo1nJfEJB5q66WJXcR1Jmoa7cUvd9x6y/2pTXbxPjCZ6gxM40DpX8xt6UZNIL7PjcMAQ/QMlrastC6ZOSexV8WmF/QZ6jmG303V0fxE47jzXfJ5uZkPYLNlUU/EIaB8GHt0AQmsDEevOCTeOSby5ybpP7Q0V4Ch3FDKErUxUPZ+ui0FozlgKPUqM4k+dPmrj7vT0FBGjGUSlO5UmCN9WP4ZSI+/i37n5vdxGeXFOcvj+941S96TQ3Edw5+d35TYnk4CcJbJpOXRgF9yn4mre+O7+t2VxaSbf+zqf/u6LAD+rHqLGa8fd25OOaNTOEZqw9ed9hgeBAI0HSLNsbF/KaLmWnAitiRVrDSeJzku+YvO+w7sn7+nKrGZPfmxfeuvewUybvnd9V2G0S+HkSx1HL/XXzL/kP3rq3r6hyUuwoTq7sCwSfpJIHUko1rfSg5PkEtzXb+fZPbo4UfJ9CtCp+PkpwRmUHn4/8UwfOmLy/r2P3A311LYKTK/sC0jEEf9uKOoscSZWijZQ8meBOzzX+HtyvUrFDWs4xqfE9sQBxF1BWTg665l5fkvSfyLCOdZ1qbef8z8Tk/X0XILqBD063zgEwKHgQeAl4bPeDfT8Httm0A3+KdKnMGlzXudGYcwpsF0xOecRkz38e9X1EDXjKeey1+6FDu8F325kdow1BoeBgx42bO1opYUuMID6G/HXgHKcCZ8Eg8UmyWcS1ebYgrmo765VKxkaEGr054bieX1SFGSD2ql/Ow5MpYrtXHdpO8AqCj6+PvVwX46TjKQVOrqw6lDxHsZY7Dxh6mQOWvDxG4AICH1dgDSUmlMKfnIGSJx38mAJ/1nbWKxubVoSrLTLknirRpeDlu1cd2paHp6H0XHn0kOA94XLgJmbeYPW8xB+XP7ZlV4uWp8q9u1cd2g4cCfwp+KgkOg+gHcB/Aj8Gnjtg8SuTBaXp6obsXjWvF1hXX+jMPCqCC1zydw44/X8b8NS1AVcePyQQ8SGVoi9Nsbxyal452egjgGOAp1t08KoLPGDxKxPAs8nZaum5Fk89sUrRXKCtWQEgYYIbBauBzcWOojwQ53HdnmXS8+7VXJcJvnTPv7ynVc5r7sXvhaOY6KD3KbiNYm966pxL8G018250FCtP9PYQfI9K7mkwh42xU8P9mutTkI+fSfvMPoKpLxmXfDI568iKJYnnfc6eH/bSUBfb8+O5HZi7sJbskzYCeQ3i5NKHto3n9fW00vuzlzDs+dHcHqwNxJ2uM5n3NuAPSydve7k6YPTUOwPylQSfGTtUESRn0bWKYIJPkHxR9FRPaBJc5mULZwJTx2XRUz1BwZ+kFM0hZ/5Z3ylFKBa1G/c82dNWk5xnMSG6RiEKhAhChJLPqWtlXJNx3/XXN1g+ac/T7wwZijTv9YaZwjTmjuReQnSZauZSNP8MmDMVvHg6Fgs+WSWXm+V7WjlTMt6u4HtE3DO9H3VQlTjRT7vbCL6JkntbnWfGWSb45ujp7vlApOjp7i6JAeQjDL8PHCmYnzRLtTXr/2naIyS2Ap9ArNYJv81rmIxy9EsrMPG4a94RMJdgVqT9t72c9yrg7LrafLT64CApGA4Gz4vbRHSU4GhEv2EOuF0pb8g1jQ3K8JiMd4IulfyAjt9ZyeGMqAXuyeyM9zMHQ8SnQHeAO/LadbJfbMiDIQIuK3rbp0o4P/OOYNOJPU/iCOB05MVTHJbxrkTWjlWMvyV5uY4b3VmgeAP5ryo1eLr+5UHB1lLQjYK2VrriWoUB1qpJC1su2/s/uk4jbt/tymqfym17EpuB6xCr9P6xiVbEJwsm+lVnkMMC4Gabjyqn5Suz5Sq+ngDGDDsF20DbDFvB/ye0Bdhqe5NadLwaKfxsV0C+3PLNmfmYgh41oJKEFLdKPIm0S0e/3lIbcvTc7CBrns15gvMN3Tlv/GTNZxLrTmAlaKvtMaFJm4qkio4djcgVvoJAMm9Xo193tku+23AmBTtH/qQjw0sSjwA/MqwXjCFXavRBsNUm3A062vBxzCmJEWl5rNgDYBnWLTpmV6Vl33FvuKfWR4me7+gGvi/xARewtgsGTnY/ArYbXgZvA8aSUt/BRvOIe7Pn5C3CTRZp80+CT+h94xMzCFnqOsxCkzJI3guxkV+Y1W38sMQHeRtKcV/AZMKbNaCP6Mg3xyh+maVBF6qF2KeZGY6tyYttXZZ/JViQp6iL/I69gXGBGNT8tgbrLB0xua2Feltmp32RU5angzK5zevKjxpOa/n9hn1wNOGkx2wuCIOVbS1Y50yLWS7wQWjhut6bLXnLTDpU9wWMssVvErhd5oawcM94hpooapCogynnAEdNsnqZwaJKvJL1Al16ac78feYw1PW6Jb/am4Quwzyh/j1RkyA3nWxrgClncEKWuEU0vpHXKIrBW6G2pY6Md5in+66z+55bh6Hm/aLktx2YP9f8PZsKso5FEtEA0+yvsEQzGqjEq3FIMV1HSzuLzuCDtwOT8uCfVsTmfanjyq34Oi1n+QLbksJhJ819k8gxbHtS79oXxw81L4r2N4HyCBE1y9G4xAjxq0+dRY6cYCvmOuAXgn7D+4DfFfQl1dZOT+vHCUGPkwpFASEnML+ciRPYCkxx6bm5o5juINsFjCR/GqJGcSZ/ZcJEwAPAMr0r2po8uwl4oupP/SYEoCwnXCUqwPHAXYb5U2Xq6t8DSaimuDq6ZSZOYCsw5QLL1XI+ZloHRRPAqznvnW0xuoJIj4SeKDedoXdFEfX1faLfhNUKPtHyXXFhMTNKf87WeIGeTBuZlmHy6tt5ZjGdTK+7H73GvX4N15xveSf3+LfMKxgHiv/YUZwY+y0Heyd3+TX2TOGPpsdZWoCHFsbKhSkiwozzxR7lRo9ij+JolGGPsNgj5DVGtfIXsOpgotdo8whfiEZ5c2qcZKzjyW9KDTnEmQlMUyo346B4l8c4Pxpjt8f4djQ6VV8vxBlmCuMxgkdZHI3yG49hj/G6x+imoOc7Z5ymMP8POdY5DZBkJLgAAAAASUVORK5CYII="
 
 func GetIcon(urlFmt string, iconName string) (image.Image, string, error) {
 	cacheDir, err := os.UserCacheDir()
@@ -23,11 +27,7 @@ func GetIcon(urlFmt string, iconName string) (image.Image, string, error) {
 	filePath := filepath.Join(cacheDir, "lemon", iconName+".png")
 	_, err = os.Stat(filePath)
 	if os.IsNotExist(err) {
-		if urlFmt != "" {
-			if err := DownloadIcon(urlFmt, iconName, filePath); err != nil {
-				return nil, "", err
-			}
-		} else {
+		if err := DownloadIcon(urlFmt, iconName, filePath); err != nil {
 			return nil, "", err
 		}
 	}
@@ -53,15 +53,29 @@ func DownloadIcon(urlFmt string, iconName string, filePath string) error {
 	}
 	defer file.Close()
 
-	response, err := http.Get(fmt.Sprintf(urlFmt, iconName))
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
+	if urlFmt != "" {
+		response, err := http.Get(fmt.Sprintf(urlFmt, iconName))
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
 
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		return err
+		_, err = io.Copy(file, response.Body)
+		if err != nil {
+			return err
+		}
+	} else {
+		dummyData, err := base64.StdEncoding.DecodeString(dummyImage)
+		if err != nil {
+			return err
+		}
+
+		reader := bytes.NewReader(dummyData)
+
+		_, err = io.Copy(file, reader)
+		if err != nil {
+			return nil
+		}
 	}
 
 	return nil

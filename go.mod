@@ -11,6 +11,7 @@ require (
 require (
 	github.com/esiqveland/notify v0.11.2 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
