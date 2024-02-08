@@ -69,8 +69,8 @@ type PushoverOptions struct {
 }
 
 func (src *Pushover) Setup(ibx chan inbox.Message, opts interface{}) error {
-	src.deviceId = opts.(PushoverOptions).DeviceID
-	src.secret = opts.(PushoverOptions).Secret
+	src.deviceId = opts.(*PushoverOptions).DeviceID
+	src.secret = opts.(*PushoverOptions).Secret
 	src.ibx = ibx
 
 	return nil
