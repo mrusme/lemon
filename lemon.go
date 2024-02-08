@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -13,11 +14,48 @@ import (
 	"github.com/mrusme/lemon/source/pushover"
 )
 
+var flagSourcesString string
+var flagOutputsString string
+
+var flagPushoverDeviceID string
+var flagPushoverSecret string
+
+func env(name string, dflt string) string {
+	val, exists := os.LookupEnv(name)
+	if exists == false {
+		return dflt
+	}
+
+	return val
+}
+
+func init() {
+	flag.StringVar(
+		&flagSourcesString,
+		"sources",
+		env("LEMON_SOURCES", "dummy"),
+		"Notification sources to load, comma separated.\nAvailable: dummy pushover\nOverrides env LEMON_OUTPUTS\n")
+	flag.StringVar(
+		&flagOutputsString,
+		"outputs",
+		env("LEMON_OUTPUTS", "dbus"),
+		"Notification outputs to load, comma separated.\nAvailable: dbus unicorn\nOverrides env LEMON_OUTPUTS\n")
+
+	flag.StringVar(
+		&flagPushoverDeviceID,
+		"pushover-device-id",
+		env("PUSHOVER_DEVICE_ID", ""),
+		"Pushover source: The device ID to use.\nOverrides env PUSHOVER_DEVICE_ID\n")
+	flag.StringVar(
+		&flagPushoverSecret,
+		"pushover-secret",
+		env("PUSHOVER_SECRET", ""),
+		"Pushover source: The secret to use.\nOverrides env PUSHOVER_SECRET\n")
+
+}
+
 func main() {
-	deviceId := os.Getenv("PUSHOVER_DEVICE_ID")
-	secret := os.Getenv("PUSHOVER_SECRET")
-	sourcesString := os.Getenv("LEMON_SOURCES")
-	outputsString := os.Getenv("LEMON_OUTPUTS")
+	flag.Parse()
 
 	osSig := make(chan os.Signal, 1)
 	signal.Notify(osSig, os.Interrupt, syscall.SIGTERM)
@@ -25,11 +63,18 @@ func main() {
 	ibx := make(chan inbox.Message)
 
 	var sources []source.Source
-	for _, sourceString := range strings.Split(sourcesString, ",") {
-		s, err := source.New(sourceString, ibx, &pushover.PushoverOptions{
-			DeviceID: deviceId,
-			Secret:   secret,
-		})
+	for _, sourceString := range strings.Split(flagSourcesString, ",") {
+		var opts interface{}
+
+		switch sourceString {
+		case "pushover":
+			opts = &pushover.PushoverOptions{
+				DeviceID: flagPushoverDeviceID,
+				Secret:   flagPushoverSecret,
+			}
+		}
+
+		s, err := source.New(sourceString, ibx, opts)
 		if err != nil {
 			panic(err)
 		}
@@ -37,7 +82,7 @@ func main() {
 	}
 
 	var outputs []output.Output
-	for _, outputString := range strings.Split(outputsString, ",") {
+	for _, outputString := range strings.Split(flagOutputsString, ",") {
 		o, err := output.New(outputString)
 		if err != nil {
 			panic(err)
