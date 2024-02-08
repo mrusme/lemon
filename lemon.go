@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/mrusme/lemon/inbox"
 	"github.com/mrusme/lemon/output"
@@ -16,6 +18,9 @@ func main() {
 	secret := os.Getenv("PUSHOVER_SECRET")
 	sourcesString := os.Getenv("LEMON_SOURCES")
 	outputsString := os.Getenv("LEMON_OUTPUTS")
+
+	osSig := make(chan os.Signal, 1)
+	signal.Notify(osSig, os.Interrupt, syscall.SIGTERM)
 
 	ibx := make(chan inbox.Message)
 
@@ -45,6 +50,7 @@ func main() {
 	}
 
 	log.Println("All set, entering main loop ...")
+mainloop:
 	for {
 		select {
 		case ibxMsg := <-ibx:
@@ -56,12 +62,21 @@ func main() {
 					log.Printf("ERROR: %s\n", err)
 				}
 			}
+		case sig := <-osSig:
+			log.Printf("Received signal: %s\n", sig.String())
+			switch sig {
+			case os.Interrupt, syscall.SIGTERM:
+				log.Println("Breaking main loop...")
+				break mainloop
+			}
 		}
 	}
 
+	log.Println("Cleaning up ...")
 	for _, o := range outputs {
 		o.Cleanup()
 	}
 
+	log.Println("Bye!")
 	os.Exit(0)
 }
