@@ -5,11 +5,13 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 
 	"github.com/mrusme/lemon/inbox"
 	"github.com/mrusme/lemon/output"
+	"github.com/mrusme/lemon/output/unicorn"
 	"github.com/mrusme/lemon/source"
 	"github.com/mrusme/lemon/source/pushover"
 )
@@ -19,6 +21,8 @@ var flagOutputsString string
 
 var flagPushoverDeviceID string
 var flagPushoverSecret string
+
+var flagOutputUnicornFPS int
 
 func env(name string, dflt string) string {
 	val, exists := os.LookupEnv(name)
@@ -52,6 +56,16 @@ func init() {
 		env("PUSHOVER_SECRET", ""),
 		"Pushover source: The secret to use.\nOverrides env PUSHOVER_SECRET\n")
 
+	num, err := strconv.Atoi(env("LEMON_OUTPUT_UNICORN_FPS", "10"))
+	if err != nil {
+		panic(err)
+	}
+	flag.IntVar(
+		&flagOutputUnicornFPS,
+		"output-unicorn-fps",
+		num,
+		"Unicorn output: Frames per second.\nOverrides env LEMON_OUTPUT_UNICORN_FPS\n")
+
 }
 
 func main() {
@@ -83,7 +97,16 @@ func main() {
 
 	var outputs []output.Output
 	for _, outputString := range strings.Split(flagOutputsString, ",") {
-		o, err := output.New(outputString)
+		var opts interface{}
+
+		switch outputString {
+		case "unicorn":
+			opts = &unicorn.UnicornOptions{
+				FPS: uint8(flagOutputUnicornFPS),
+			}
+		}
+
+		o, err := output.New(outputString, opts)
 		if err != nil {
 			panic(err)
 		}

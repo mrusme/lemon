@@ -9,13 +9,13 @@ import (
 )
 
 type Output interface {
-	Setup() error
+	Setup(opts interface{}) error
 	Cleanup()
 
 	Display(ibxMsg *inbox.Message) error
 }
 
-func New(name string) (Output, error) {
+func New(name string, opts interface{}) (Output, error) {
 	var output Output
 
 	switch name {
@@ -27,7 +27,7 @@ func New(name string) (Output, error) {
 		return nil, errors.New("No such output")
 	}
 
-	err := output.Setup()
+	err := output.Setup(opts)
 	if err != nil {
 		return nil, err
 	}

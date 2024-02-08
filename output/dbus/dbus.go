@@ -10,7 +10,7 @@ type Dbus struct {
 	conn *db.Conn
 }
 
-func (out *Dbus) Setup() error {
+func (out *Dbus) Setup(opts interface{}) error {
 
 	conn, err := db.SessionBusPrivate()
 	if err != nil {

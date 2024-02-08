@@ -24,6 +24,8 @@ import (
 var fs embed.FS
 
 type Unicorn struct {
+	fps uint8
+
 	port spi.PortCloser
 	uchd *unicornhd.Dev
 
@@ -32,9 +34,14 @@ type Unicorn struct {
 	typewriter *font.Drawer
 }
 
-func (out *Unicorn) Setup() error {
+type UnicornOptions struct {
+	FPS uint8
+}
 
+func (out *Unicorn) Setup(opts interface{}) error {
 	var err error
+
+	out.fps = opts.(*UnicornOptions).FPS
 
 	if _, err = host.Init(); err != nil {
 		return err
@@ -113,7 +120,7 @@ func (out *Unicorn) Display(ibxMsg *inbox.Message) error {
 	for i := 0; i < (out.uchd.Bounds().Dx() + tmp.Bounds().Dx()); i++ {
 		p.X += 1
 		out.uchd.Draw(out.uchd.Bounds(), tmp, tmp.Bounds().Bounds().Min.Add(p))
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * time.Duration(1000/int(out.fps)))
 	}
 	out.uchd.Draw(out.uchd.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 0}}, image.Point{})
 	return nil
