@@ -2,6 +2,7 @@ package dummy
 
 import (
 	"log"
+	"time"
 
 	"github.com/mrusme/lemon/helpers"
 	"github.com/mrusme/lemon/inbox"
@@ -34,6 +35,7 @@ func (src *Dummy) Start() (int, error) {
 			URL:      "http://xn--gckvb8fzb.com",
 		}
 		src.ibx <- ibxMsg
+		time.Sleep(time.Second * 10)
 	}
 
 	return 0, nil
