@@ -143,14 +143,18 @@ func (po *Pushover) stream() (PushoverStreamReturn, error) {
 
 			for _, msg := range msgs {
 				fmt.Println(msg)
-				icon, err := po.getIcon(msg.Icon)
+				icon, iconPath, err := po.getIcon(msg.Icon)
 				if err != nil {
 					log.Printf("Error: %s\n", err)
 					continue
 				}
+				// TODO: if msg.HTML == 1 { convert HTML to text }
 				ibxMsg := inbox.Message{
-					Icon: icon,
-					Text: msg.Title,
+					Icon:     icon,
+					IconPath: iconPath,
+					Title:    msg.Title,
+					Text:     msg.Message,
+					URL:      msg.URL,
 				}
 				po.ibx <- ibxMsg
 			}
@@ -240,36 +244,36 @@ func (po *Pushover) deleteMessages(msgs []PushoverMessage) error {
 	return nil
 }
 
-func (po *Pushover) getIcon(iconName string) (image.Image, error) {
+func (po *Pushover) getIcon(iconName string) (image.Image, string, error) {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if err := os.MkdirAll(filepath.Join(cacheDir, "lemon"), 0755); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	filePath := filepath.Join(cacheDir, "lemon", iconName+".png")
 	_, err = os.Stat(filePath)
 	if os.IsNotExist(err) {
 		if err := po.downloadIcon(iconName, filePath); err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer file.Close()
 
 	img, err := png.Decode(file)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return img, nil
+	return img, filePath, nil
 }
 
 func (po *Pushover) downloadIcon(iconName string, filePath string) error {
