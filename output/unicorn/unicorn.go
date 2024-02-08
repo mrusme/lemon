@@ -111,7 +111,6 @@ func (out *Unicorn) Display(ibxMsg *inbox.Message) error {
 	// os.Exit(0)
 
 	for i := 0; i < (out.uchd.Bounds().Dx() + tmp.Bounds().Dx()); i++ {
-		fmt.Println(i)
 		p.X += 1
 		out.uchd.Draw(out.uchd.Bounds(), tmp, tmp.Bounds().Bounds().Min.Add(p))
 		time.Sleep(time.Millisecond * 100)
