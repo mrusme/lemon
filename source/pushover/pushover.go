@@ -150,6 +150,14 @@ func (src *Pushover) stream() (PushoverStreamReturn, error) {
 					log.Printf("Error: %s\n", err)
 					continue
 				}
+
+				prio := inbox.PriorityNormal
+				if msg.Priority < 0 {
+					prio = inbox.PriorityLow
+				} else if msg.Priority > 0 {
+					prio = inbox.PriorityHigh
+				}
+
 				// TODO: if msg.HTML == 1 { convert HTML to text }
 				ibxMsg := inbox.Message{
 					Icon:     icon,
@@ -157,6 +165,7 @@ func (src *Pushover) stream() (PushoverStreamReturn, error) {
 					Title:    msg.Title,
 					Text:     msg.Message,
 					URL:      msg.URL,
+					Prio:     prio,
 				}
 				src.ibx <- ibxMsg
 			}

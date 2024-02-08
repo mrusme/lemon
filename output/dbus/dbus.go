@@ -37,12 +37,19 @@ func (out *Dbus) Cleanup() {
 }
 
 func (out *Dbus) Display(ibxMsg *inbox.Message) error {
+	var urgency byte = byte(ibxMsg.Prio)
+
+	h := make(map[string]db.Variant)
+	h["urgency"] = db.MakeVariant(urgency)
+
 	n := notify.Notification{
-		AppName:    "",
-		ReplacesID: uint32(0),
-		AppIcon:    ibxMsg.IconPath,
-		Summary:    ibxMsg.Title,
-		Body:       ibxMsg.Text,
+		AppName:       "",
+		ReplacesID:    uint32(0),
+		AppIcon:       ibxMsg.IconPath,
+		Summary:       ibxMsg.Title,
+		Body:          ibxMsg.Text,
+		ExpireTimeout: notify.ExpireTimeoutSetByNotificationServer,
+		Hints:         h,
 	}
 
 	_, err := notify.SendNotification(out.conn, n)

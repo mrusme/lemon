@@ -33,6 +33,7 @@ func (src *Dummy) Start() (int, error) {
 			Title:    "Dummy Title ",
 			Text:     "Dummy Message",
 			URL:      "http://xn--gckvb8fzb.com",
+			Prio:     inbox.PriorityNormal,
 		}
 		src.ibx <- ibxMsg
 		time.Sleep(time.Second * 10)
