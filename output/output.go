@@ -11,6 +11,7 @@ import (
 type Output interface {
 	Setup() error
 	Cleanup()
+
 	Display(ibxMsg *inbox.Message) error
 }
 

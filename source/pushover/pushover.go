@@ -67,40 +67,46 @@ type Pushover struct {
 	ibx      chan inbox.Message
 }
 
-func New(ibx chan inbox.Message, deviceId string, secret string) (*Pushover, error) {
-	var po = new(Pushover)
-
-	po.deviceId = deviceId
-	po.secret = secret
-	po.ibx = ibx
-
-	return po, nil
+type PushoverOptions struct {
+	DeviceID string
+	Secret   string
 }
 
-func (po *Pushover) Stream() {
+func (src *Pushover) Setup(ibx chan inbox.Message, opts interface{}) error {
+	src.deviceId = opts.(PushoverOptions).DeviceID
+	src.secret = opts.(PushoverOptions).Secret
+	src.ibx = ibx
+
+	return nil
+}
+
+func (src *Pushover) Cleanup() {
+}
+
+func (src *Pushover) Start() (int, error) {
 	for {
-		status, err := po.stream()
+		status, err := src.stream()
 		switch status {
 		case PushoverOk:
 			log.Println("pushover terminated normally, quitting")
-			os.Exit(0)
+			return int(PushoverOk), nil
 		case PushoverError:
 			log.Printf("pushover error: %s", err)
-			os.Exit(int(status))
+			return int(status), err
 		case PushoverReconnectRequest:
 			log.Println("pushover requested reconnect")
 			continue
 		case PushoverReauthenticateRequest:
 			log.Println("pushover requested re-auth, quitting")
-			os.Exit(int(status))
+			return int(status), err
 		case PushoverEndRequest:
 			log.Println("pushover requested end, quitting")
-			os.Exit(int(status))
+			return int(status), err
 		}
 	}
 }
 
-func (po *Pushover) stream() (PushoverStreamReturn, error) {
+func (src *Pushover) stream() (PushoverStreamReturn, error) {
 	u := url.URL{
 		Scheme: "wss",
 		Host:   "client.pushover.net",
@@ -119,8 +125,8 @@ func (po *Pushover) stream() (PushoverStreamReturn, error) {
 		websocket.TextMessage,
 		[]byte(fmt.Sprintf(
 			"login:%s:%s\n",
-			po.deviceId,
-			po.secret,
+			src.deviceId,
+			src.secret,
 		)),
 	)
 
@@ -136,14 +142,14 @@ func (po *Pushover) stream() (PushoverStreamReturn, error) {
 			continue
 		case "!":
 			// A new message has arrived; you should perform a sync.
-			msgs, err := po.getMessages()
+			msgs, err := src.getMessages()
 			if err != nil {
 				log.Println(err)
 			}
 
 			for _, msg := range msgs {
 				fmt.Println(msg)
-				icon, iconPath, err := po.getIcon(msg.Icon)
+				icon, iconPath, err := src.getIcon(msg.Icon)
 				if err != nil {
 					log.Printf("Error: %s\n", err)
 					continue
@@ -156,10 +162,10 @@ func (po *Pushover) stream() (PushoverStreamReturn, error) {
 					Text:     msg.Message,
 					URL:      msg.URL,
 				}
-				po.ibx <- ibxMsg
+				src.ibx <- ibxMsg
 			}
 
-			if err := po.deleteMessages(msgs); err != nil {
+			if err := src.deleteMessages(msgs); err != nil {
 				log.Println(err)
 			}
 			// Reload request; you should drop your connection and re-connect.
@@ -176,7 +182,7 @@ func (po *Pushover) stream() (PushoverStreamReturn, error) {
 	}
 }
 
-func (po *Pushover) getMessages() ([]PushoverMessage, error) {
+func (src *Pushover) getMessages() ([]PushoverMessage, error) {
 	var err error
 	u := "https://api.pushover.net/1/messages"
 
@@ -192,8 +198,8 @@ func (po *Pushover) getMessages() ([]PushoverMessage, error) {
 	req.Header.Set("User-Agent", "lemon")
 
 	q := req.URL.Query()
-	q.Add("device_id", po.deviceId)
-	q.Add("secret", po.secret)
+	q.Add("device_id", src.deviceId)
+	q.Add("secret", src.secret)
 	req.URL.RawQuery = q.Encode()
 
 	res, err := pushoverClient.Do(req)
@@ -223,15 +229,15 @@ func (po *Pushover) getMessages() ([]PushoverMessage, error) {
 	return messagesResponse.Messages, nil
 }
 
-func (po *Pushover) deleteMessages(msgs []PushoverMessage) error {
+func (src *Pushover) deleteMessages(msgs []PushoverMessage) error {
 	data := url.Values{
-		"secret":  {po.secret},
+		"secret":  {src.secret},
 		"message": {msgs[len(msgs)-1].IDstr},
 	}
 
 	resp, err := http.PostForm(
 		"https://api.pushover.net/1/devices/"+
-			po.deviceId+"/update_highest_message.json",
+			src.deviceId+"/update_highest_message.json",
 		data,
 	)
 	if err != nil {
@@ -244,7 +250,7 @@ func (po *Pushover) deleteMessages(msgs []PushoverMessage) error {
 	return nil
 }
 
-func (po *Pushover) getIcon(iconName string) (image.Image, string, error) {
+func (src *Pushover) getIcon(iconName string) (image.Image, string, error) {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
 		return nil, "", err
@@ -257,7 +263,7 @@ func (po *Pushover) getIcon(iconName string) (image.Image, string, error) {
 	filePath := filepath.Join(cacheDir, "lemon", iconName+".png")
 	_, err = os.Stat(filePath)
 	if os.IsNotExist(err) {
-		if err := po.downloadIcon(iconName, filePath); err != nil {
+		if err := src.downloadIcon(iconName, filePath); err != nil {
 			return nil, "", err
 		}
 	}
@@ -276,7 +282,7 @@ func (po *Pushover) getIcon(iconName string) (image.Image, string, error) {
 	return img, filePath, nil
 }
 
-func (po *Pushover) downloadIcon(iconName string, filePath string) error {
+func (src *Pushover) downloadIcon(iconName string, filePath string) error {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
