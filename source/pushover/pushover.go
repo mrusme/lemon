@@ -4,18 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image"
-	"image/png"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/mrusme/lemon/helpers"
 	"github.com/mrusme/lemon/inbox"
 )
 
@@ -149,7 +145,7 @@ func (src *Pushover) stream() (PushoverStreamReturn, error) {
 
 			for _, msg := range msgs {
 				fmt.Println(msg)
-				icon, iconPath, err := src.getIcon(msg.Icon)
+				icon, iconPath, err := helpers.GetIcon(PushoverIconsURLFmt, msg.Icon)
 				if err != nil {
 					log.Printf("Error: %s\n", err)
 					continue
@@ -245,59 +241,6 @@ func (src *Pushover) deleteMessages(msgs []PushoverMessage) error {
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return errors.New("Status code not 200")
-	}
-
-	return nil
-}
-
-func (src *Pushover) getIcon(iconName string) (image.Image, string, error) {
-	cacheDir, err := os.UserCacheDir()
-	if err != nil {
-		return nil, "", err
-	}
-
-	if err := os.MkdirAll(filepath.Join(cacheDir, "lemon"), 0755); err != nil {
-		return nil, "", err
-	}
-
-	filePath := filepath.Join(cacheDir, "lemon", iconName+".png")
-	_, err = os.Stat(filePath)
-	if os.IsNotExist(err) {
-		if err := src.downloadIcon(iconName, filePath); err != nil {
-			return nil, "", err
-		}
-	}
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, "", err
-	}
-	defer file.Close()
-
-	img, err := png.Decode(file)
-	if err != nil {
-		return nil, "", err
-	}
-
-	return img, filePath, nil
-}
-
-func (src *Pushover) downloadIcon(iconName string, filePath string) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	response, err := http.Get(fmt.Sprintf(PushoverIconsURLFmt, iconName))
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		return err
 	}
 
 	return nil

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/mrusme/lemon/inbox"
+	"github.com/mrusme/lemon/source/dummy"
 	"github.com/mrusme/lemon/source/pushover"
 )
 
@@ -18,6 +19,8 @@ func New(name string, ibx chan inbox.Message, opts interface{}) (Source, error) 
 	var source Source
 
 	switch name {
+	case "dummy":
+		source = new(dummy.Dummy)
 	case "pushover":
 		source = new(pushover.Pushover)
 	default:
