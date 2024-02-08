@@ -74,6 +74,7 @@ func main() {
 	for {
 		select {
 		case ibxMsg := <-ibx:
+			fmt.Println("Got new ibxMessage")
 			fmt.Println(ibxMsg)
 		}
 	}

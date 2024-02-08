@@ -1,6 +1,6 @@
 module github.com/mrusme/lemon
 
-go 1.21.6
+go 1.21
 
 require (
 	periph.io/x/conn/v3 v3.7.0

@@ -25,6 +25,8 @@ const (
 	PushoverEndRequest
 )
 
+const PushoverIconsURLFmt = "https://api.pushover.net/icons/%s.png"
+
 type PushoverMessage struct {
 	ID      int    `json:"id"`
 	IDstr   string `json:"id_str"`
@@ -73,7 +75,7 @@ func New(ibx chan inbox.Message, deviceId string, secret string) (*Pushover, err
 
 func (po *Pushover) Stream() {
 	for {
-		status, err := po.pushoverStream()
+		status, err := po.stream()
 		switch status {
 		case PushoverOk:
 			log.Println("pushover terminated normally, quitting")
@@ -94,7 +96,7 @@ func (po *Pushover) Stream() {
 	}
 }
 
-func (po *Pushover) pushoverStream() (PushoverStreamReturn, error) {
+func (po *Pushover) stream() (PushoverStreamReturn, error) {
 	u := url.URL{
 		Scheme: "wss",
 		Host:   "client.pushover.net",
@@ -130,7 +132,7 @@ func (po *Pushover) pushoverStream() (PushoverStreamReturn, error) {
 			continue
 		case "!":
 			// A new message has arrived; you should perform a sync.
-			msgs, err := pushoverGetMessages(po.deviceId, po.secret)
+			msgs, err := po.getMessages()
 			if err != nil {
 				log.Println(err)
 			}
@@ -144,7 +146,7 @@ func (po *Pushover) pushoverStream() (PushoverStreamReturn, error) {
 				po.ibx <- ibxMsg
 			}
 
-			if err := pushoverDeleteMessages(po.deviceId, po.secret, msgs); err != nil {
+			if err := po.deleteMessages(msgs); err != nil {
 				log.Println(err)
 			}
 			// Reload request; you should drop your connection and re-connect.
@@ -161,7 +163,7 @@ func (po *Pushover) pushoverStream() (PushoverStreamReturn, error) {
 	}
 }
 
-func pushoverGetMessages(deviceId, secret string) ([]PushoverMessage, error) {
+func (po *Pushover) getMessages() ([]PushoverMessage, error) {
 	var err error
 	u := "https://api.pushover.net/1/messages"
 
@@ -177,8 +179,8 @@ func pushoverGetMessages(deviceId, secret string) ([]PushoverMessage, error) {
 	req.Header.Set("User-Agent", "lemon")
 
 	q := req.URL.Query()
-	q.Add("device_id", deviceId)
-	q.Add("secret", secret)
+	q.Add("device_id", po.deviceId)
+	q.Add("secret", po.secret)
 	req.URL.RawQuery = q.Encode()
 
 	res, err := pushoverClient.Do(req)
@@ -208,15 +210,15 @@ func pushoverGetMessages(deviceId, secret string) ([]PushoverMessage, error) {
 	return messagesResponse.Messages, nil
 }
 
-func pushoverDeleteMessages(deviceId, secret string, msgs []PushoverMessage) error {
+func (po *Pushover) deleteMessages(msgs []PushoverMessage) error {
 	data := url.Values{
-		"secret":  {secret},
+		"secret":  {po.secret},
 		"message": {msgs[len(msgs)-1].IDstr},
 	}
 
 	resp, err := http.PostForm(
 		"https://api.pushover.net/1/devices/"+
-			deviceId+"/update_highest_message.json",
+			po.deviceId+"/update_highest_message.json",
 		data,
 	)
 	if err != nil {
@@ -227,32 +229,4 @@ func pushoverDeleteMessages(deviceId, secret string, msgs []PushoverMessage) err
 	}
 
 	return nil
-}
-
-func pushoverMessageToString(msg PushoverMessage) string {
-	var s string = ""
-
-	s = fmt.Sprintf(
-		"%s\n\n%s\n",
-		msg.Title,
-		msg.Message,
-	)
-
-	if msg.URLTitle != "" {
-		s = fmt.Sprintf(
-			"%s\n%s",
-			s,
-			msg.URLTitle,
-		)
-	}
-
-	if msg.URL != "" {
-		s = fmt.Sprintf(
-			"%s\n%s",
-			s,
-			msg.URL,
-		)
-	}
-
-	return s
 }
