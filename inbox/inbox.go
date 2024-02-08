@@ -1,6 +1,8 @@
 package inbox
 
+import "image"
+
 type Message struct {
-	Icon string
+	Icon image.Image
 	Text string
 }
