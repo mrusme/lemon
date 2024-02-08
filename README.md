@@ -83,7 +83,7 @@ Example:
 
 #### Unicorn Hat HD
 
-![Raspberry Pi 3A+ & Pimoroni Unicorn Hat HD](lemon-unicorn.jpg)
+![Raspberry Pi 3A+ & Pimoroni Unicorn Hat HD](lemon-unicorn.gif)
 
 Download/build the `arm64` version, copy onto the Raspberry Pi and, enable SPI 
 via `raspi-config` and use `-outputs unicorn` as output.
