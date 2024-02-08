@@ -5,11 +5,15 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"os"
 
 	"periph.io/x/conn/v3/spi"
 	"periph.io/x/conn/v3/spi/spireg"
 	"periph.io/x/devices/v3/unicornhd"
 	"periph.io/x/host/v3"
+
+	"github.com/mrusme/lemon/inbox"
+	"github.com/mrusme/lemon/pushover"
 )
 
 var port spi.PortCloser
@@ -48,7 +52,29 @@ func bye() {
 }
 
 func main() {
-	defer bye()
-	setup()
+	dry := os.Getenv("DRY_LEMON")
+	deviceId := os.Getenv("PUSHOVER_DEVICE_ID")
+	secret := os.Getenv("PUSHOVER_SECRET")
 
+	fmt.Println(dry)
+	if dry == "" {
+		defer bye()
+		setup()
+	}
+
+	ibx := make(chan inbox.Message)
+
+	po, err := pushover.New(ibx, deviceId, secret)
+	if err != nil {
+		panic(err)
+	}
+
+	go po.Stream()
+
+	for {
+		select {
+		case ibxMsg := <-ibx:
+			fmt.Println(ibxMsg)
+		}
+	}
 }
