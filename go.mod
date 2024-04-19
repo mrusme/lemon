@@ -13,4 +13,4 @@ require (
 	periph.io/x/host/v3 v3.8.2
 )
 
-require golang.org/x/net v0.22.0 // indirect
+require golang.org/x/net v0.23.0 // indirect
