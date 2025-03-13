@@ -1,6 +1,7 @@
 module github.com/mrusme/lemon
 
 go 1.21
+toolchain go1.23.7
 
 require (
 	github.com/esiqveland/notify v0.11.2
@@ -13,4 +14,4 @@ require (
 	periph.io/x/host/v3 v3.8.2
 )
 
-require golang.org/x/net v0.23.0 // indirect
+require golang.org/x/net v0.36.0 // indirect
