@@ -1,0 +1,5 @@
+theme: jekyll-theme-minimal
+logo: lemon-logo.png
+title: Lemon
+description: LED Monitor, for monitoring all sort of stuff and getting notified when something happens.
+show_downloads: "true"
